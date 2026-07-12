@@ -1,0 +1,257 @@
+:root {
+    --bg-color: #000000;
+    --surface-color: rgba(255, 255, 255, 0.15);
+    --surface-hover: rgba(255, 255, 255, 0.25);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --accent: #d32f2f;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    min-height: 100dvh;
+    user-select: none;
+}
+
+.remote-container {
+    width: 100%;
+    max-width: 400px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 2rem 1.5rem 6rem 1.5rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background: radial-gradient(circle at top, #1a1a1a, #000000);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.fw-light { font-weight: 400; color: var(--text-secondary); }
+
+button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    outline: none;
+    touch-action: manipulation;
+}
+
+/* Base button with glassmorphism */
+.btn {
+    background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0 2px 5px rgba(255,255,255,0.4), inset 0 -2px 5px rgba(0,0,0,0.3), 0 5px 15px rgba(0,0,0,0.5);
+    transition: transform 0.1s, background 0.1s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn:active {
+    transform: scale(0.95);
+    background: var(--surface-hover);
+}
+
+.btn-power {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: var(--accent);
+}
+
+/* Middle Row */
+.middle-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.dpad {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    flex-shrink: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), rgba(0,0,0,0.6));
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0 4px 10px rgba(255,255,255,0.4), inset 0 -4px 10px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+.btn-dpad {
+    position: absolute;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all 0.1s;
+    border: none;
+}
+
+.btn-dpad:active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.btn-dpad.up { top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 100% 0, 50% 50%); }
+.btn-dpad.down { top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 100%, 100% 100%, 50% 50%); }
+.btn-dpad.left { top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 0 100%, 50% 50%); }
+.btn-dpad.right { top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(100% 0, 100% 100%, 50% 50%); }
+
+.btn-dpad svg { position: absolute; }
+.btn-dpad.up svg { top: 12.5%; left: 50%; transform: translate(-50%, -50%); }
+.btn-dpad.down svg { bottom: 12.5%; left: 50%; transform: translate(-50%, 50%); }
+.btn-dpad.left svg { left: 12.5%; top: 50%; transform: translate(-50%, -50%); }
+.btn-dpad.right svg { right: 12.5%; top: 50%; transform: translate(50%, -50%); }
+
+.btn-dpad.center {
+    top: 25%;
+    left: 25%;
+    width: 50%;
+    height: 50%;
+    background: linear-gradient(145deg, rgba(255,255,255,0.3), rgba(0,0,0,0.5));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+    border-radius: 50%;
+    font-weight: 600;
+    box-shadow: inset 0 4px 10px rgba(255,255,255,0.4), inset 0 -4px 10px rgba(0,0,0,0.7), 0 6px 15px rgba(0,0,0,0.8);
+    z-index: 10;
+    clip-path: none;
+}
+
+.btn-dpad.center:active {
+    background: var(--surface-hover);
+    transform: scale(0.95);
+}
+
+/* Controls */
+.controls-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-action {
+    flex: 1;
+    height: 60px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.vol-rocker {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(0,0,0,0.6));
+    border-radius: 40px;
+    width: 80px;
+    height: 240px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: inset 0 4px 12px rgba(255,255,255,0.4), inset 0 -4px 12px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.8);
+}
+
+.btn-vol {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    transition: all 0.1s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.btn-vol:not(:last-child) {
+    border-bottom: 2px solid rgba(0,0,0,0.6);
+    box-shadow: 0 2px 0 rgba(255,255,255,0.15);
+}
+
+.btn-vol:active { background: rgba(255, 255, 255, 0.1); }
+.btn-vol[data-action="mute"] { 
+    font-size: 1rem; 
+    color: var(--text-secondary); 
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Apps */
+.apps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.btn-app {
+    height: 60px;
+    border: 1px solid rgba(255,255,255,0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 16px;
+    transition: transform 0.1s, opacity 0.1s;
+}
+
+.btn-app:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+}
+
+.btn-app img {
+    height: 36px;
+    max-width: 90%;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.yttv { background: linear-gradient(145deg, #FF3333, #CC0000); box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -3px 5px rgba(0,0,0,0.4), 0 5px 15px rgba(255, 0, 0, 0.4); color: white; }
+.youtube { background: linear-gradient(145deg, #FF3333, #CC0000); box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -3px 5px rgba(0,0,0,0.4), 0 5px 15px rgba(255, 0, 0, 0.4); color: white; }
+.netflix { background: linear-gradient(145deg, #FF1A26, #B30710); box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -3px 5px rgba(0,0,0,0.4), 0 5px 15px rgba(229, 9, 20, 0.4); color: white; }
+.prime { background: linear-gradient(145deg, #1AC1F2, #0087B5); box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -3px 5px rgba(0,0,0,0.4), 0 5px 15px rgba(0, 168, 225, 0.4); color: white; }
+.prime img { transform: scale(3.5); }
+.disney { 
+    background: linear-gradient(145deg, #113CCF, #040714); 
+    color: white; 
+    font-size: 1.1rem; 
+    font-weight: 700;
+    box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -3px 5px rgba(0,0,0,0.4), 0 5px 15px rgba(17, 60, 207, 0.4);
+}
+.paramount { 
+    background: linear-gradient(145deg, #1A75FF, #004DB3); 
+    box-shadow: inset 0 2px 5px rgba(255,255,255,0.5), inset 0 -3px 5px rgba(0,0,0,0.4), 0 5px 15px rgba(0, 100, 255, 0.4); 
+    color: white;
+    font-size: 1.1rem; 
+    font-weight: 700;
+}

@@ -1,0 +1,13 @@
+version: '3.3'
+
+services:
+  lg-remote:
+    build: .
+    container_name: lg-remote
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./public:/app/public
+    environment:
+      - TV_IP=192.168.1.29

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>LG Remote</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="remote-container">
+        <!-- Header -->
+        <header>
+            <div class="brand">LG <span class="fw-light">TV Remote</span></div>
+            <button class="btn btn-power" data-action="power">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+            </button>
+        </header>
+
+        <!-- Middle Row: D-Pad and Volume -->
+        <div class="middle-row">
+            <div class="dpad">
+                <button class="btn-dpad up" data-action="up">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                </button>
+                <button class="btn-dpad right" data-action="right">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <button class="btn-dpad down" data-action="down">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <button class="btn-dpad left" data-action="left">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <button class="btn-dpad center" data-action="enter">
+                    <span>OK</span>
+                </button>
+            </div>
+
+            <div class="vol-rocker">
+                <button class="btn-vol" data-action="vol_up">+</button>
+                <button class="btn-vol" data-action="mute">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                </button>
+                <button class="btn-vol" data-action="vol_down">-</button>
+            </div>
+        </div>
+
+        <!-- Controls (Back, Home) -->
+        <div class="controls-grid">
+            <button class="btn btn-action" data-action="back" aria-label="Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            <button class="btn btn-action" data-action="home" aria-label="Home">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+        </div>
+
+        <!-- Apps -->
+        <div class="apps-grid">
+            <button class="btn btn-app yttv" data-app="youtube.leanback.ytv.v1">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/YouTube_TV_logo.svg" alt="YouTube TV">
+            </button>
+            <button class="btn btn-app youtube" data-app="youtube.leanback.v4">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube">
+            </button>
+            <button class="btn btn-app netflix" data-app="netflix">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/netflix.svg" alt="Netflix">
+            </button>
+            <button class="btn btn-app prime" data-app="amazon">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/primevideo.svg" alt="Prime Video">
+            </button>
+            <button class="btn btn-app disney" data-app="com.disney.disneyplus-prod">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" alt="Disney+">
+            </button>
+            <button class="btn btn-app paramount" data-app="com.viacom.paramountplus">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/paramountplus.svg" alt="Paramount+">
+            </button>
+        </div>
+    </div>
+    <script src="/app.js"></script>
+</body>
+</html>

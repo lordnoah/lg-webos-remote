@@ -1,0 +1,14 @@
+[Unit]
+Description=LG TV Remote PWA Backend
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/lg-remote
+# Update the path to your python virtual environment
+ExecStart=/opt/lg-remote/.venv/bin/python3 -m uvicorn server:app --host 0.0.0.0 --port 8000
+Restart=always
+Environment=TV_IP=192.168.1.29
+
+[Install]
+WantedBy=multi-user.target

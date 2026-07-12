@@ -1,0 +1,17 @@
+{
+  "name": "remote",
+  "version": "1.0.0",
+  "description": "This prototype helps discover your LG TV on the network and provides next-step pairing instructions for webOS control. It does not perform pairing automatically — it scaffolds discovery and contains instructions/snippets for pairing using `aiopywebostv`.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@procot/webostv": "^1.2.6",
+    "webos": "^3.0.1"
+  }
+}
