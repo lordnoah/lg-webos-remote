@@ -39,11 +39,11 @@ The easiest way to run the backend is via Docker on an always-on device in your 
    ```bash
    sudo docker-compose up -d
    ```
-   This will build the Python image, mount the `public/` directory, and expose the Flask server on port `5001`.
+   This will build the Python image, mount the `public/` directory, and expose the Flask server on port `8000`.
 
 3. **Install on your Phone**
    - Open Safari (iOS) or Chrome (Android).
-   - Navigate to `http://<YOUR_SERVER_IP>:5001`.
+   - Navigate to `http://<YOUR_SERVER_IP>:8000`.
    - Tap "Share" -> "Add to Home Screen".
    - You now have a full-screen, native-feeling remote app on your phone!
 
