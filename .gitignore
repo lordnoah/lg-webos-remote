@@ -9,3 +9,4 @@ node_modules/
 *.pem
 hello.json
 .env
+webos_client_key.txt

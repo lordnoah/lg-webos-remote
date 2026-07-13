@@ -1,52 +1,91 @@
 import asyncio
+import logging
+import re
+from contextlib import asynccontextmanager
+
 import os
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from webos_wrapper import WebOSWrapper
 from remote import KEY_MAP
 
-app = FastAPI()
+logger = logging.getLogger(__name__)
 
 # Configuration
 TV_IP = os.getenv("TV_IP", "192.168.1.29")
 wrapper = WebOSWrapper(TV_IP)
 
+# Allowlist of launchable app IDs
+APP_ALLOWLIST = {
+    "youtube.leanback.ytv.v1",
+    "youtube.leanback.v4",
+    "netflix",
+    "amazon",
+    "com.disney.disneyplus-prod",
+    "com.viacom.paramountplus",
+}
+
+# Regex for validating app IDs that aren't in the allowlist
+_APP_ID_RE = re.compile(r"^[a-zA-Z0-9._-]+$")
+
+
 class ActionRequest(BaseModel):
     action: str
+
 
 class AppRequest(BaseModel):
     app_id: str
 
-@app.on_event("startup")
-async def startup_event():
-    # Attempt to pair in the background so it doesn't block the server from starting
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: attempt to pair in the background
     async def bg_pair():
         try:
-            print(f"Connecting to TV at {TV_IP}...")
+            logger.info("Connecting to TV at %s...", TV_IP)
             await wrapper.pair()
-            print("Paired successfully!")
-        except Exception as e:
-            print(f"Startup pairing failed: {e}")
-            # Will retry on command
-            
-    asyncio.create_task(bg_pair())
+            logger.info("Paired successfully!")
+        except Exception:
+            logger.exception("Startup pairing failed (will retry on command)")
+
+    pair_task = asyncio.create_task(bg_pair())
+    pair_task.add_done_callback(
+        lambda t: t.result() if not t.cancelled() else None
+    )
+    yield
+    # Shutdown: cancel pairing task if still running
+    if not pair_task.done():
+        pair_task.cancel()
+
+
+app = FastAPI(lifespan=lifespan)
+
 
 @app.post("/api/command")
 async def send_command(req: ActionRequest):
-    key = KEY_MAP.get(req.action, req.action)
+    key = KEY_MAP.get(req.action)
+    if key is None:
+        raise HTTPException(status_code=400, detail=f"Unknown action: {req.action}")
     try:
         await wrapper.send_key(key)
         return {"status": "success", "key": key}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Failed to send command '%s'", req.action)
+        raise HTTPException(status_code=500, detail="Command failed")
+
 
 @app.post("/api/launch")
 async def launch_app(req: AppRequest):
+    # Validate app ID against allowlist or safe format
+    if req.app_id not in APP_ALLOWLIST:
+        if not _APP_ID_RE.match(req.app_id):
+            raise HTTPException(status_code=400, detail="Invalid app ID format")
+
     try:
         await wrapper._ensure_client()
         client = wrapper._client
-        
+
         # aiopywebostv's launch_app or generic request
         if hasattr(client, "launch_app"):
             await client.launch_app(req.app_id)
@@ -59,10 +98,14 @@ async def launch_app(req: AppRequest):
                 req_fn("ssap://com.webos.applicationManager/launch", {"id": req.app_id})
         else:
             raise RuntimeError("launch_app not supported by this client library")
-            
+
         return {"status": "success", "app_id": req.app_id}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to launch app '%s'", req.app_id)
+        raise HTTPException(status_code=500, detail="Launch failed")
+
 
 # Serve the PWA static files
 app.mount("/", StaticFiles(directory="public", html=True), name="public")

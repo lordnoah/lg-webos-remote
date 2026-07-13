@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lg-remote-v5';
+const CACHE_NAME = 'lg-remote-v6';
 const ASSETS = [
     '/',
     '/index.html',
@@ -33,11 +33,20 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    // Only cache GET requests (don't cache POST to /api)
-    if (event.request.method === 'GET' && !event.request.url.includes('/api/')) {
-        event.respondWith(
-            caches.match(event.request)
-            .then(response => response || fetch(event.request))
-        );
+    // Never cache API calls
+    if (event.request.method !== 'GET' || event.request.url.includes('/api/')) {
+        return;
     }
+
+    // Network-first: try the network, fall back to cache for offline use
+    event.respondWith(
+        fetch(event.request)
+            .then(response => {
+                // Clone and update cache with fresh response
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                return response;
+            })
+            .catch(() => caches.match(event.request))
+    );
 });
