@@ -84,93 +84,23 @@ window.oncontextmenu = function(event) {
     return false;
 };
 
-// PWA Install Prompt Logic
-let deferredPrompt = null;
-const installBanner = document.getElementById('pwa-install-banner');
-const installBtn = document.getElementById('pwa-install-btn');
-const closeBtn = document.getElementById('pwa-close-btn');
-const pwaDesc = document.getElementById('pwa-desc');
-
-// Detect iOS
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-// Detect standalone mode (already installed)
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-
-function initPwaPrompt() {
-    const isDismissed = localStorage.getItem('pwa-prompt-dismissed');
-    if (isDismissed || isStandalone) return;
-
-    if (isIOS) {
-        // Customize text for iOS
-        if (pwaDesc) {
-            pwaDesc.textContent = 'Tap Share > Add to Home Screen';
+// Fullscreen API Logic
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+if (fullscreenBtn) {
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
         }
-        if (installBtn) {
-            installBtn.style.display = 'none'; // Hide install button since iOS needs manual share sheet
-        }
-        if (installBanner) {
-            installBanner.classList.remove('hidden');
-        }
-    } else {
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the mini-infobar from appearing on mobile
-            e.preventDefault();
-            // Stash the event so it can be triggered later.
-            deferredPrompt = e;
-            // Update UI to notify the user they can install the PWA
-            if (installBanner) {
-                installBanner.classList.remove('hidden');
-            }
-        });
-    }
-
-    if (installBtn) {
-        const handleInstallClick = async (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            if (!deferredPrompt) {
-                console.warn('Cannot trigger PWA installation: deferredPrompt is null. Ensure the site is served over HTTPS or localhost, and that the Service Worker is registered.');
-                return;
-            }
-            try {
-                // Show the install prompt
-                deferredPrompt.prompt();
-                // Wait for the user to respond to the prompt
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
-                // We've used the prompt, and can't use it again, clear it
-                deferredPrompt = null;
-                hideInstallBanner();
-            } catch (err) {
-                console.error('Failed to trigger PWA install prompt:', err);
-            }
-        };
-
-        installBtn.addEventListener('click', handleInstallClick);
-        installBtn.addEventListener('touchstart', handleInstallClick);
-    }
-
-    if (closeBtn) {
-        const handleCloseClick = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            localStorage.setItem('pwa-prompt-dismissed', 'true');
-            hideInstallBanner();
-        };
-        closeBtn.addEventListener('click', handleCloseClick);
-        closeBtn.addEventListener('touchstart', handleCloseClick);
-    }
+    };
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    fullscreenBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        toggleFullscreen();
+    });
 }
-
-function hideInstallBanner() {
-    if (installBanner) {
-        installBanner.classList.add('hidden');
-    }
-}
-
-// Initialize PWA prompt setup
-initPwaPrompt();

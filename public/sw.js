@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lg-remote-v2';
+const CACHE_NAME = 'lg-remote-v3';
 const ASSETS = [
     '/',
     '/index.html',
