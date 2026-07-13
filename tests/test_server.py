@@ -52,7 +52,51 @@ def test_command_error_does_not_leak_details(monkeypatch):
         "server.wrapper.send_key",
         AsyncMock(side_effect=RuntimeError("secret internal error at /opt/lg-remote/webos.py:42"))
     )
+    monkeypatch.setattr(
+        "server.wrapper.pair",
+        AsyncMock(side_effect=RuntimeError("pair also fails"))
+    )
     response = client.post("/api/command", json={"action": "up"})
     assert response.status_code == 500
     assert "secret" not in response.json()["detail"]
     assert response.json()["detail"] == "Command failed"
+
+
+def test_power_command_sends_wol(monkeypatch):
+    """Power command should send WOL magic packets."""
+    from unittest.mock import MagicMock
+    mock_wol = MagicMock()
+    monkeypatch.setattr("server.wakeonlan.send_magic_packet", mock_wol)
+    response = client.post("/api/command", json={"action": "power"})
+    assert response.status_code == 200
+    assert mock_wol.call_count >= 1
+
+
+def test_power_command_succeeds_even_when_tv_unreachable(monkeypatch):
+    """Power command should return success (WOL sent) even if the TV is off."""
+    from unittest.mock import AsyncMock, MagicMock
+    monkeypatch.setattr(
+        "server.wrapper.send_key",
+        AsyncMock(side_effect=ConnectionError("TV is off"))
+    )
+    monkeypatch.setattr(
+        "server.wrapper.pair",
+        AsyncMock(side_effect=ConnectionError("TV is off"))
+    )
+    mock_wol = MagicMock()
+    monkeypatch.setattr("server.wakeonlan.send_magic_packet", mock_wol)
+    response = client.post("/api/command", json={"action": "power"})
+    assert response.status_code == 200
+    assert response.json()["note"] == "WOL sent"
+    assert mock_wol.call_count >= 1
+
+
+def test_non_power_command_does_not_send_wol(monkeypatch):
+    """Non-power commands should not send WOL packets."""
+    from unittest.mock import MagicMock
+    mock_wol = MagicMock()
+    monkeypatch.setattr("server.wakeonlan.send_magic_packet", mock_wol)
+    response = client.post("/api/command", json={"action": "vol_up"})
+    assert response.status_code == 200
+    assert mock_wol.call_count == 0
+

@@ -16,7 +16,7 @@ Located in the `public/` directory, the frontend is built with pure HTML, CSS, a
 
 ### Backend (Python)
 The backend acts as a bridge between the HTTP frontend and the WebSocket-based WebOS TV.
-- **`server.py`**: A FastAPI HTTP server that serves the static frontend files and exposes `/api/command` and `/api/launch` REST endpoints.
+- **`server.py`**: A FastAPI HTTP server that serves the static frontend files and exposes `/api/command` and `/api/launch` REST endpoints. Includes Wake-on-LAN (WOL) support to power on the TV from standby, and auto-reconnect logic so the server recovers gracefully if it starts while the TV is off.
 - **`webos_wrapper.py`**: An asynchronous wrapper around the `aiopywebostv` library. It maintains a persistent WebSocket connection to the LG TV, translating incoming REST API calls into WebOS commands (volume control, D-pad navigation, app launching, etc.).
 - **`discovery.py` & `pair.py`**: Helper scripts used to discover the LG TV on the local network and perform the initial pairing handshake.
 
@@ -41,7 +41,15 @@ The easiest way to run the backend is via Docker on an always-on device in your 
    ```
    This will build the Python image, mount the `public/` directory, and expose the FastAPI server on port `8000`.
 
-3. **Install on your Phone**
+   > **Note:** The Docker Compose file uses `network_mode: "host"` so that Wake-on-LAN broadcast packets can reach the TV on the local network. The server binds to port `8000` directly on the host.
+
+3. **Configure your TV for Remote Power-On**
+   To allow the web remote to turn the TV on from standby:
+   - Go to **Settings > General > Always Ready** and select **"Always Ready without wallpaper"**. This keeps the network interface alive in standby so the TV can receive Wake-on-LAN packets.
+   - Go to **Settings > General > Devices > TV Management > TV On With Mobile** and enable **"Turn on via Wi-Fi"**.
+   - The `TV_MAC` environment variable in `docker-compose.yml` should match your TV's **Ethernet MAC address** (found in Settings > Network > Wired Connection).
+
+4. **Install on your Phone**
    - Open Safari (iOS) or Chrome (Android).
    - Navigate to `http://<YOUR_SERVER_IP>:8000`.
    - Tap "Share" -> "Add to Home Screen".

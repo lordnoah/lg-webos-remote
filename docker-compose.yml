@@ -5,8 +5,7 @@ services:
     build: .
     container_name: lg-remote
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    network_mode: "host"
     volumes:
       - ./public:/app/public
     environment:
