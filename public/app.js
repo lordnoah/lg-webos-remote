@@ -87,6 +87,16 @@ window.oncontextmenu = function(event) {
 // Fullscreen API Logic
 const fullscreenBtn = document.getElementById('fullscreen-btn');
 if (fullscreenBtn) {
+    // Detect iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // Detect standalone mode (already installed)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    // Only show fullscreen button if NOT on iOS AND NOT in standalone mode
+    if (!isIOS && !isStandalone) {
+        fullscreenBtn.style.display = 'flex';
+    }
+
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
