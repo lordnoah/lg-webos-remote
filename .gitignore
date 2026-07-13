@@ -10,3 +10,4 @@ node_modules/
 hello.json
 .env
 webos_client_key.txt
+/deploy.sh
