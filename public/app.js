@@ -1,8 +1,14 @@
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.error('Service Worker registration failed:', err);
+    navigator.serviceWorker.register('/sw.js')
+    .then(reg => {
+        console.log('Service Worker registered successfully with scope:', reg.scope);
+    })
+    .catch(err => {
+        console.error('Service Worker registration failed. Note: PWAs require HTTPS or localhost to run service workers:', err);
     });
+} else {
+    console.warn('Service workers are not supported by this browser.');
 }
 
 // Function to trigger haptic feedback if supported
@@ -119,24 +125,44 @@ function initPwaPrompt() {
     }
 
     if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            // Show the install prompt
-            deferredPrompt.prompt();
-            // Wait for the user to respond to the prompt
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
-            // We've used the prompt, and can't use it again, clear it
-            deferredPrompt = null;
-            hideInstallBanner();
-        });
+        const handleInstallClick = async (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (!deferredPrompt) {
+                console.warn('Cannot trigger PWA installation: deferredPrompt is null. Ensure the site is served over HTTPS or localhost, and that the Service Worker is registered.');
+                return;
+            }
+            try {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                // We've used the prompt, and can't use it again, clear it
+                deferredPrompt = null;
+                hideInstallBanner();
+            } catch (err) {
+                console.error('Failed to trigger PWA install prompt:', err);
+            }
+        };
+
+        installBtn.addEventListener('click', handleInstallClick);
+        installBtn.addEventListener('touchstart', handleInstallClick);
     }
 
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
+        const handleCloseClick = (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
             localStorage.setItem('pwa-prompt-dismissed', 'true');
             hideInstallBanner();
-        });
+        };
+        closeBtn.addEventListener('click', handleCloseClick);
+        closeBtn.addEventListener('touchstart', handleCloseClick);
     }
 }
 
