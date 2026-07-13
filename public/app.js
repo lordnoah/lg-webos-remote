@@ -77,3 +77,74 @@ window.oncontextmenu = function(event) {
     event.stopPropagation();
     return false;
 };
+
+// PWA Install Prompt Logic
+let deferredPrompt = null;
+const installBanner = document.getElementById('pwa-install-banner');
+const installBtn = document.getElementById('pwa-install-btn');
+const closeBtn = document.getElementById('pwa-close-btn');
+const pwaDesc = document.getElementById('pwa-desc');
+
+// Detect iOS
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+// Detect standalone mode (already installed)
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+function initPwaPrompt() {
+    const isDismissed = localStorage.getItem('pwa-prompt-dismissed');
+    if (isDismissed || isStandalone) return;
+
+    if (isIOS) {
+        // Customize text for iOS
+        if (pwaDesc) {
+            pwaDesc.textContent = 'Tap Share > Add to Home Screen';
+        }
+        if (installBtn) {
+            installBtn.style.display = 'none'; // Hide install button since iOS needs manual share sheet
+        }
+        if (installBanner) {
+            installBanner.classList.remove('hidden');
+        }
+    } else {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can install the PWA
+            if (installBanner) {
+                installBanner.classList.remove('hidden');
+            }
+        });
+    }
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, clear it
+            deferredPrompt = null;
+            hideInstallBanner();
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            localStorage.setItem('pwa-prompt-dismissed', 'true');
+            hideInstallBanner();
+        });
+    }
+}
+
+function hideInstallBanner() {
+    if (installBanner) {
+        installBanner.classList.add('hidden');
+    }
+}
+
+// Initialize PWA prompt setup
+initPwaPrompt();
