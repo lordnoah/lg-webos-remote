@@ -6,6 +6,7 @@ def mock_webos_wrapper(monkeypatch):
     """Mocks the WebOSWrapper methods so tests don't try to connect to a real TV."""
     monkeypatch.setattr("server.wrapper.pair", AsyncMock(return_value="mock-key"))
     monkeypatch.setattr("server.wrapper.send_key", AsyncMock())
+    monkeypatch.setattr("server.wrapper.get_current_app", AsyncMock(return_value="youtube.leanback.ytv.v1"))
     monkeypatch.setattr("server.wrapper._ensure_client", AsyncMock())
 
     # Mock the internal client for launch app

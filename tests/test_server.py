@@ -8,10 +8,19 @@ def test_command_endpoint():
     assert response.status_code == 200
     assert response.json() == {"status": "success", "key": "VOLUMEUP"}
 
-def test_command_flashback():
+def test_command_flashback_yttv():
     response = client.post("/api/command", json={"action": "flashback"})
     assert response.status_code == 200
-    assert response.json() == {"status": "success", "key": "FLASHBACK"}
+    assert response.json()["status"] == "success"
+    assert response.json()["mode"] == "yttv_macro"
+
+def test_command_flashback_native(monkeypatch):
+    from unittest.mock import AsyncMock
+    monkeypatch.setattr("server.wrapper.get_current_app", AsyncMock(return_value="com.webos.app.livetv"))
+    response = client.post("/api/command", json={"action": "flashback"})
+    assert response.status_code == 200
+    assert response.json()["status"] == "success"
+    assert response.json()["mode"] == "native"
 
 def test_command_unknown_action_rejected():
     response = client.post("/api/command", json={"action": "self_destruct"})

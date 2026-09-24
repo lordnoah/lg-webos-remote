@@ -155,3 +155,30 @@ class WebOSWrapper:
                 pass
 
         raise RuntimeError("Unable to send key: no compatible method found on aiopywebostv client")
+
+    async def get_current_app(self) -> Optional[str]:
+        """Get the currently running foreground app ID."""
+        await self._ensure_client()
+        client = self._client
+
+        if hasattr(client, "get_current_app"):
+            fn = getattr(client, "get_current_app")
+            try:
+                res = await fn() if asyncio.iscoroutinefunction(fn) else fn()
+                if isinstance(res, dict):
+                    return res.get("appId")
+                elif isinstance(res, str):
+                    return res
+            except Exception:
+                pass
+
+        req = getattr(client, "request", None)
+        if req:
+            try:
+                res = await req("ssap://com.webos.applicationManager/getForegroundAppInfo") if asyncio.iscoroutinefunction(req) else req("ssap://com.webos.applicationManager/getForegroundAppInfo")
+                if isinstance(res, dict):
+                    return res.get("appId")
+            except Exception:
+                pass
+
+        return None

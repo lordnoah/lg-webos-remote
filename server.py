@@ -108,17 +108,36 @@ async def send_command(req: ActionRequest):
 
     if req.action in ("flashback", "recall"):
         try:
-            await execute_yttv_flashback()
-            return {"status": "success", "key": "FLASHBACK"}
-        except Exception as e:
-            logger.warning(f"Initial flashback macro failed: {e}. Attempting to re-pair...")
+            current_app = await wrapper.get_current_app()
+        except Exception:
+            current_app = None
+
+        if current_app == "youtube.leanback.ytv.v1":
             try:
-                await wrapper.pair()
                 await execute_yttv_flashback()
-                return {"status": "success", "key": "FLASHBACK", "note": "re-paired successfully"}
-            except Exception:
-                logger.exception("Failed to execute flashback sequence")
-                raise HTTPException(status_code=500, detail="Command failed")
+                return {"status": "success", "key": "FLASHBACK", "mode": "yttv_macro"}
+            except Exception as e:
+                logger.warning(f"Initial flashback macro failed: {e}. Attempting to re-pair...")
+                try:
+                    await wrapper.pair()
+                    await execute_yttv_flashback()
+                    return {"status": "success", "key": "FLASHBACK", "mode": "yttv_macro", "note": "re-paired successfully"}
+                except Exception:
+                    logger.exception("Failed to execute flashback sequence")
+                    raise HTTPException(status_code=500, detail="Command failed")
+        else:
+            try:
+                await wrapper.send_key("FLASHBACK")
+                return {"status": "success", "key": "FLASHBACK", "mode": "native"}
+            except Exception as e:
+                logger.warning(f"Initial send_key failed: {e}. Attempting to re-pair...")
+                try:
+                    await wrapper.pair()
+                    await wrapper.send_key("FLASHBACK")
+                    return {"status": "success", "key": "FLASHBACK", "mode": "native", "note": "re-paired successfully"}
+                except Exception:
+                    logger.exception("Failed to send FLASHBACK key")
+                    raise HTTPException(status_code=500, detail="Command failed")
 
     key = KEY_MAP.get(req.action)
     if key is None:
