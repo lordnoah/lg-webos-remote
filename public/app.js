@@ -65,6 +65,7 @@ function attachTapHandler(element, callback) {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             isSwiping = false;
+            element.classList.add('btn-active');
         }
     }, { passive: true });
 
@@ -75,11 +76,13 @@ function attachTapHandler(element, callback) {
             // Movement > 8px indicates a swipe/scroll gesture, cancel tap
             if (Math.hypot(dx, dy) > 8) {
                 isSwiping = true;
+                element.classList.remove('btn-active');
             }
         }
     }, { passive: true });
 
     element.addEventListener('touchend', (e) => {
+        setTimeout(() => element.classList.remove('btn-active'), 120);
         if (!isSwiping) {
             lastTouchTime = Date.now();
             e.preventDefault();
@@ -89,6 +92,7 @@ function attachTapHandler(element, callback) {
 
     element.addEventListener('touchcancel', () => {
         isSwiping = true;
+        element.classList.remove('btn-active');
     });
 
     element.addEventListener('click', (e) => {
@@ -96,6 +100,8 @@ function attachTapHandler(element, callback) {
         if (Date.now() - lastTouchTime < 500) {
             return;
         }
+        element.classList.add('btn-active');
+        setTimeout(() => element.classList.remove('btn-active'), 120);
         callback();
     });
 }

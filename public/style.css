@@ -92,8 +92,8 @@ button {
     align-items: center;
 }
 
-.btn:active {
-    transform: scale(0.95);
+.btn:active, .btn.btn-active {
+    transform: scale(0.93);
     background: var(--surface-hover);
 }
 
