@@ -115,12 +115,13 @@ document.querySelectorAll('button[data-app]').forEach(btn => {
     attachTapHandler(btn, () => launchApp(btn.getAttribute('data-app')));
 });
 
-// Prevent long-press context menu on mobile
+// Prevent long-press context menu and text selection on mobile
 window.oncontextmenu = function(event) {
     event.preventDefault();
     event.stopPropagation();
     return false;
 };
+document.addEventListener('selectstart', (e) => e.preventDefault());
 
 // Fullscreen API Logic
 const fullscreenBtn = document.getElementById('fullscreen-btn');

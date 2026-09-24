@@ -64,6 +64,32 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+async def execute_yttv_flashback():
+    """Execute normalized YouTube TV previous channel macro sequence."""
+    sequence = [
+        ("DOWN", 0.15),
+        ("DOWN", 0.15),
+        # Clamp to far left (5 lefts across 6 items)
+        ("LEFT", 0.07),
+        ("LEFT", 0.07),
+        ("LEFT", 0.07),
+        ("LEFT", 0.07),
+        ("LEFT", 0.07),
+        # Navigate to Networks (5th item = 4 rights)
+        ("RIGHT", 0.08),
+        ("RIGHT", 0.08),
+        ("RIGHT", 0.08),
+        ("RIGHT", 0.08),
+        # Open Networks recent channel row and select first channel
+        ("ENTER", 0.25),
+        ("ENTER", 0.0),
+    ]
+    for key, delay in sequence:
+        await wrapper.send_key(key)
+        if delay > 0:
+            await asyncio.sleep(delay)
+
+
 @app.post("/api/command")
 async def send_command(req: ActionRequest):
     if req.action == "power" and TV_MAC:
@@ -79,6 +105,20 @@ async def send_command(req: ActionRequest):
             logger.info("Sent WOL packets to %s (ports 7 & 9, broadcasts: %s)", TV_MAC, subnet_bcast if len(parts)==4 else '255.255.255.255')
         except Exception:
             logger.exception("Failed to send WOL packet")
+
+    if req.action in ("flashback", "recall"):
+        try:
+            await execute_yttv_flashback()
+            return {"status": "success", "key": "FLASHBACK"}
+        except Exception as e:
+            logger.warning(f"Initial flashback macro failed: {e}. Attempting to re-pair...")
+            try:
+                await wrapper.pair()
+                await execute_yttv_flashback()
+                return {"status": "success", "key": "FLASHBACK", "note": "re-paired successfully"}
+            except Exception:
+                logger.exception("Failed to execute flashback sequence")
+                raise HTTPException(status_code=500, detail="Command failed")
 
     key = KEY_MAP.get(req.action)
     if key is None:
