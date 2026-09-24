@@ -14,6 +14,8 @@ KEY_MAP = {
     "enter": "ENTER",
     "back": "BACK",
     "home": "HOME",
+    "flashback": "FLASHBACK",
+    "recall": "FLASHBACK",
     "vol_up": "VOLUMEUP",
     "vol_down": "VOLUMEDOWN",
     "mute": "MUTE",

@@ -52,29 +52,61 @@ async function launchApp(appId) {
     }
 }
 
-// Add event listeners to all buttons
+// Track timestamp to prevent synthetic clicks from firing after touchend
+let lastTouchTime = 0;
+
+function attachTapHandler(element, callback) {
+    let startX = 0;
+    let startY = 0;
+    let isSwiping = false;
+
+    element.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isSwiping = false;
+        }
+    }, { passive: true });
+
+    element.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+            const dx = e.touches[0].clientX - startX;
+            const dy = e.touches[0].clientY - startY;
+            // Movement > 8px indicates a swipe/scroll gesture, cancel tap
+            if (Math.hypot(dx, dy) > 8) {
+                isSwiping = true;
+            }
+        }
+    }, { passive: true });
+
+    element.addEventListener('touchend', (e) => {
+        if (!isSwiping) {
+            lastTouchTime = Date.now();
+            e.preventDefault();
+            callback();
+        }
+    });
+
+    element.addEventListener('touchcancel', () => {
+        isSwiping = true;
+    });
+
+    element.addEventListener('click', (e) => {
+        // Prevent double firing if touchend already handled this interaction
+        if (Date.now() - lastTouchTime < 500) {
+            return;
+        }
+        callback();
+    });
+}
+
+// Add event listeners to all buttons using gesture-safe tap handler
 document.querySelectorAll('button[data-action]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        // Prevent double firing on touch devices
-        e.preventDefault();
-        sendCommand(btn.getAttribute('data-action'));
-    });
-    // Add touchstart for better responsiveness on mobile
-    btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        sendCommand(btn.getAttribute('data-action'));
-    });
+    attachTapHandler(btn, () => sendCommand(btn.getAttribute('data-action')));
 });
 
 document.querySelectorAll('button[data-app]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        launchApp(btn.getAttribute('data-app'));
-    });
-    btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        launchApp(btn.getAttribute('data-app'));
-    });
+    attachTapHandler(btn, () => launchApp(btn.getAttribute('data-app')));
 });
 
 // Prevent long-press context menu on mobile

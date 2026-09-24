@@ -8,6 +8,11 @@ def test_command_endpoint():
     assert response.status_code == 200
     assert response.json() == {"status": "success", "key": "VOLUMEUP"}
 
+def test_command_flashback():
+    response = client.post("/api/command", json={"action": "flashback"})
+    assert response.status_code == 200
+    assert response.json() == {"status": "success", "key": "FLASHBACK"}
+
 def test_command_unknown_action_rejected():
     response = client.post("/api/command", json={"action": "self_destruct"})
     assert response.status_code == 400
